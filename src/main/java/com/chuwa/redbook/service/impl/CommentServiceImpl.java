@@ -41,10 +41,7 @@ public class CommentServiceImpl implements CommentService {
         // retrieve post entity by id
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
-        // set post to comment entity
         comment.setPost(post);
-
-        // comment entity to DB
         Comment savedComment = commentRepository.save(comment);
 
         return modelMapper.map(savedComment, CommentDto.class);
