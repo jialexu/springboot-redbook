@@ -1,39 +1,36 @@
 package com.chuwa.redbook.controller;
 
-import com.chuwa.redbook.payload.CommentDto;
-import com.chuwa.redbook.service.CommentService;
+import java.util.List;
+
+import javax.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
-import java.util.List;
+import com.chuwa.redbook.payload.CommentDto;
+import com.chuwa.redbook.service.CommentService;
 
-/**
- * @author b1go
- * @date 6/23/22 11:30 PM
- */
 @RestController
 @RequestMapping("/api/v1")
 public class CommentController {
 
-    /**
-     * TODO: Questions
-     * why intellij give us this warning? constructor injection.
-     * how many ways we can do Dependency Injection?
-     * which way is the best one?
-     */
+    private static final Logger logger = LoggerFactory.getLogger(CommentController.class);
+
     @Autowired
     private CommentService commentService;
 
     /**
-     * TODO: Questions
-     * 当我们浏览小红书时候，点开一篇文章，请问获得这篇文章的内容，是用的哪个API？
-     * 看到大家争论库里历史地位是否超越科比，你要写评论回应，当你的评论提交时候，会call哪个API？
-     * <p>
-     * 此时此刻，思考为什么post的ID是pathVariable 而不是request parameter?
-     *
      * @param id
      * @param commentDto
      * @return
@@ -41,12 +38,18 @@ public class CommentController {
     @PostMapping("/posts/{postId}/comments")
     public ResponseEntity<CommentDto> createComment(@PathVariable(value = "postId") long id,
                                                     @Valid  @RequestBody CommentDto commentDto) {
-        return new ResponseEntity<>(commentService.createComment(id, commentDto), HttpStatus.CREATED);
+        logger.info("Received request to create comment for postId={} payload={}", id, commentDto);
+        CommentDto created = commentService.createComment(id, commentDto);
+        logger.info("Created comment for postId={} response={}", id, created);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     @GetMapping("/posts/{postId}/comments")
     public List<CommentDto> getCommentsByPostId(@PathVariable(value = "postId") Long postId) {
-        return commentService.getCommentsByPostId(postId);
+        logger.info("Fetching comments for postId={}", postId);
+        List<CommentDto> comments = commentService.getCommentsByPostId(postId);
+        logger.info("Found {} comments for postId={}", comments != null ? comments.size() : 0, postId);
+        return comments;
     }
 
     @GetMapping("/posts/{postId}/comments/{id}")
@@ -54,7 +57,9 @@ public class CommentController {
             @PathVariable(value = "postId") Long postId,
             @PathVariable(value = "id") Long commentId) {
 
+        logger.info("Fetching comment id={} for postId={}", commentId, postId);
         CommentDto commentDto = commentService.getCommentById(postId, commentId);
+        logger.info("Fetched comment id={} for postId={} response={}", commentId, postId, commentDto);
         return new ResponseEntity<>(commentDto, HttpStatus.OK);
     }
 
@@ -62,14 +67,18 @@ public class CommentController {
     public ResponseEntity<CommentDto> updateComment(@PathVariable(value = "postId") Long postId,
                                                     @PathVariable(value = "id") Long commentId,
                                                     @RequestBody CommentDto commentDto) {
+        logger.info("Updating comment id={} for postId={} payload={}", commentId, postId, commentDto);
         CommentDto updateComment = commentService.updateComment(postId, commentId, commentDto);
+        logger.info("Updated comment id={} for postId={} response={}", commentId, postId, updateComment);
         return new ResponseEntity<>(updateComment, HttpStatus.OK);
     }
 
     @DeleteMapping("/posts/{postId}/comments/{id}")
     public ResponseEntity<String> deleteComment(@PathVariable(value = "postId") Long postId,
                                                 @PathVariable(value = "id") Long commentId) {
+        logger.info("Deleting comment id={} for postId={}", commentId, postId);
         commentService.deleteComment(postId, commentId);
+        logger.info("Deleted comment id={} for postId={}", commentId, postId);
 
         return new ResponseEntity<>("Comment deleted Successfully", HttpStatus.OK);
     }
