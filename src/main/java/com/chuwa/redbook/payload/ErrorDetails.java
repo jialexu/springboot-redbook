@@ -10,11 +10,13 @@ public class ErrorDetails {
     private Date timestamp;
     private String message;
     private String details;
+    private int statusCode;
 
-    public ErrorDetails(Date timestamp, String message, String details) {
+    public ErrorDetails(Date timestamp, String message, String details, int statusCode) {
         this.timestamp = timestamp;
         this.message = message;
         this.details = details;
+        this.statusCode = statusCode;
     }
 
     public Date getTimestamp() {
@@ -40,4 +42,8 @@ public class ErrorDetails {
     public void setDetails(String details) {
         this.details = details;
     }
+
+    public int getStatusCode() { return statusCode; }
+
+    public void setStatusCode(int statusCode) { this.statusCode = statusCode; }
 }

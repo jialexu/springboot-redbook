@@ -9,49 +9,42 @@ import org.springframework.web.context.request.WebRequest;
 
 import java.util.Date;
 
-/**
- * @author b1go
- * @date 6/26/22 9:43 AM
- */
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    /**
-     * handler specific exceptions
-     * @param exception
-     * @param webRequest
-     * @return
-     */
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorDetails> handleResourceNotFoundException(ResourceNotFoundException exception,
-                                                                        WebRequest webRequest) {
-        ErrorDetails errorDetails = new ErrorDetails(new Date(), exception.getMessage(),
-                webRequest.getDescription(false));
-
-        return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
+    public ResponseEntity<ErrorDetails> handleResourceNotFound(ResourceNotFoundException ex, WebRequest request) {
+        HttpStatus status = HttpStatus.NOT_FOUND;
+        ErrorDetails errorDetails = new ErrorDetails(
+                new Date(),
+                ex.getMessage(),
+                request.getDescription(false),
+                status.value()
+        );
+        return new ResponseEntity<>(errorDetails, status);
     }
 
     @ExceptionHandler(BlogAPIException.class)
-    public ResponseEntity<ErrorDetails> handleBlogAPIException(BlogAPIException exception,
-                                                                        WebRequest webRequest) {
-        ErrorDetails errorDetails = new ErrorDetails(new Date(), exception.getMessage(),
-                webRequest.getDescription(false));
-
-        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ErrorDetails> handleBlogAPI(BlogAPIException ex, WebRequest request) {
+        HttpStatus status = ex.getHttpStatus();
+        ErrorDetails errorDetails = new ErrorDetails(
+                new Date(),
+                ex.getMessage(),
+                request.getDescription(false),
+                status.value()
+        );
+        return new ResponseEntity<>(errorDetails, status);
     }
 
-    /**
-     * global exceptions
-     * @param exception
-     * @param webRequest
-     * @return
-     */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorDetails> handleGlobalException(Exception exception,
-                                                              WebRequest webRequest) {
-        ErrorDetails errorDetails = new ErrorDetails(new Date(), exception.getMessage(),
-                webRequest.getDescription(false));
-
-        return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<ErrorDetails> handleGeneric(Exception ex, WebRequest request) {
+        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+        ErrorDetails errorDetails = new ErrorDetails(
+                new Date(),
+                ex.getMessage(),
+                request.getDescription(false),
+                status.value()
+        );
+        return new ResponseEntity<>(errorDetails, status);
     }
 }
